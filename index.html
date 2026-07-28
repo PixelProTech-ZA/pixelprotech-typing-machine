@@ -90,16 +90,22 @@ header{
   position:sticky;top:0;z-index:500;
   backdrop-filter:blur(10px);
 }
+.htitle{min-width:0;overflow:hidden;flex:1 1 auto;}
 .blogo{
   font-family:'Orbitron',sans-serif;
   font-size:clamp(11px,2.5vw,18px);
   font-weight:900;
   background:var(--grad);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  letter-spacing:1px;white-space:nowrap;
+  letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
 }
-.btag{font-size:9px;color:var(--dim);letter-spacing:1.5px;white-space:nowrap;}
+.btag{font-size:9px;color:var(--dim);letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 .hr{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+@media(max-width:420px){
+  .btag{display:none;}
+  .hbadge{padding:5px 7px;font-size:9px;}
+  .hstr{font-size:9px;}
+}
 .hbadge{border-radius:6px;padding:5px 9px;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;white-space:nowrap;}
 .hbadge.p{background:var(--pdim);border:1px solid var(--pglow);color:var(--purple);}
 .hbadge.t{background:var(--tdim);border:1px solid var(--tglow);color:var(--teal);}
@@ -273,7 +279,7 @@ header{
 
 <!-- HEADER -->
 <header>
-  <div>
+  <div class="htitle">
     <div class="blogo">PIXELPROTECH</div>
     <div class="btag">TYPING MACHINE · ELITE DIVISION</div>
   </div>
