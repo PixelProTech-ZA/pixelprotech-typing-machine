@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PixelProTech Typing Machine</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PPT Typing">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
+<style>
+@font-face{font-family:'Orbitron';font-style:normal;font-weight:400;font-display:swap;src:url('orbitron-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Orbitron';font-style:normal;font-weight:700;font-display:swap;src:url('orbitron-latin-700-normal.woff2') format('woff2');}
+@font-face{font-family:'Orbitron';font-style:normal;font-weight:900;font-display:swap;src:url('orbitron-latin-900-normal.woff2') format('woff2');}
+@font-face{font-family:'Rajdhani';font-style:normal;font-weight:400;font-display:swap;src:url('rajdhani-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Rajdhani';font-style:normal;font-weight:500;font-display:swap;src:url('rajdhani-latin-500-normal.woff2') format('woff2');}
+@font-face{font-family:'Rajdhani';font-style:normal;font-weight:600;font-display:swap;src:url('rajdhani-latin-600-normal.woff2') format('woff2');}
+@font-face{font-family:'Rajdhani';font-style:normal;font-weight:700;font-display:swap;src:url('rajdhani-latin-700-normal.woff2') format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url('jetbrains-mono-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url('jetbrains-mono-latin-500-normal.woff2') format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:swap;src:url('jetbrains-mono-latin-700-normal.woff2') format('woff2');}
+</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0f;--purple:#7b2fff;--pdim:rgba(123,47,255,.15);--pglow:rgba(123,47,255,.4);
+  --teal:#00d4aa;--tdim:rgba(0,212,170,.12);--tglow:rgba(0,212,170,.4);
+  --card:#1a1a2e;--card2:#12122a;--red:#ff3366;
+  --mid:rgba(255,255,255,.65);--dim:rgba(255,255,255,.55);--border:rgba(255,255,255,.07);
+  --grad:linear-gradient(90deg,#7b2fff,#00d4aa);
+}
+html,body{overflow-x:hidden;max-width:100vw;}
+body{background:var(--bg);color:#fff;font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);pointer-events:none;z-index:9000;}
+
+/* PARTICLES */
+#ptc{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.pt{position:absolute;border-radius:50%;animation:rise linear infinite;}
+@keyframes rise{0%{transform:translateY(105vh);opacity:0}10%{opacity:.7}90%{opacity:.7}100%{transform:translateY(-5vh);opacity:0}}
+
+/* BOOT */
+#boot{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center;}
+.b-logo{font-family:'Orbitron',sans-serif;font-size:clamp(18px,5vw,40px);font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;line-height:1.3;}
+.b-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);letter-spacing:3px;}
+.b-bar{width:min(340px,80vw);height:3px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.b-fill{height:100%;background:var(--grad);width:0;animation:bload 2.4s ease forwards;}
+@keyframes bload{0%{width:0}60%{width:72%}80%{width:88%}100%{width:100%}}
+.b-log{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);}
+.b-log span{color:var(--teal);}
+#boot{animation:bfade .5s ease 2.9s forwards;}
+@keyframes bfade{to{opacity:0;pointer-events:none;visibility:hidden;}}
+
+/* FLASH */
+#fl{position:fixed;inset:0;pointer-events:none;z-index:8000;opacity:0;}
+.ftp{background:radial-gradient(ellipse at center,rgba(0,212,170,.12),transparent 70%);animation:fa .3s ease;}
+.fpp{background:radial-gradient(ellipse at center,rgba(123,47,255,.18),transparent 70%);animation:fa .3s ease;}
+@keyframes fa{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+
+/* ACHIEVE */
+#ach{position:fixed;top:68px;right:12px;background:var(--card);border:1px solid var(--teal);border-radius:10px;padding:11px 15px;z-index:8001;transform:translateX(120%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 20px var(--tglow);max-width:240px;}
+#ach.on{transform:translateX(0);}
+#ach .at{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--teal);letter-spacing:2px;margin-bottom:3px;}
+#ach .an{font-size:13px;font-weight:700;}
+
+/* XP POPUP */
+.xpp{position:fixed;pointer-events:none;font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;color:var(--teal);text-shadow:0 0 10px var(--teal);z-index:8002;animation:xpf 1.2s ease forwards;}
+@keyframes xpf{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-38px) scale(1.2)}100%{opacity:0;transform:translateY(-75px) scale(.8)}}
+
+/* RESULTS */
+#res{position:fixed;inset:0;background:rgba(10,10,15,.93);z-index:8003;display:none;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(8px);}
+#res.on{display:flex;}
+.rc{background:var(--card);border:1px solid var(--pglow);border-radius:16px;padding:22px;max-width:480px;width:100%;box-shadow:0 0 40px var(--pglow);}
+.rt{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;letter-spacing:3px;margin-bottom:18px;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.rs{background:var(--card2);border-radius:8px;padding:12px;text-align:center;}
+.rv{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;}
+.rv.t{color:var(--teal)}.rv.p{color:var(--purple)}
+.rl{font-size:10px;color:var(--dim);letter-spacing:2px;margin-top:3px;}
+.rfb{background:var(--card2);border-radius:8px;padding:12px;margin-bottom:14px;}
+.rfb p{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:5px;}
+.rfb p:last-child{margin:0}
+.rfb strong{color:var(--teal);}
+.ra{display:flex;gap:8px;justify-content:center;}
+
+/* ── LAYOUT ── */
+#app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;width:100%;}
+
+/* HEADER — full width, outside content container */
+header{
+  width:100%;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 12px;
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:500;
+  backdrop-filter:blur(10px);
+}
+.htitle{min-width:0;overflow:hidden;flex:1 1 auto;}
+.blogo{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(11px,2.5vw,18px);
+  font-weight:900;
+  background:var(--grad);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.btag{font-size:9px;color:var(--dim);letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.hr{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+@media(max-width:420px){
+  .btag{display:none;}
+  .hbadge{padding:5px 7px;font-size:9px;}
+  .hstr{font-size:9px;}
+}
+.hbadge{border-radius:6px;padding:5px 9px;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;white-space:nowrap;}
+.hbadge.p{background:var(--pdim);border:1px solid var(--pglow);color:var(--purple);}
+.hbadge.t{background:var(--tdim);border:1px solid var(--tglow);color:var(--teal);}
+.hstr{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--mid);white-space:nowrap;}
+.hstr b{font-family:'Orbitron',sans-serif;color:#ff9500;}
+
+/* CONTENT CONTAINER */
+.wrap{width:100%;max-width:100%;margin:0 auto;padding:10px 10px 40px;overflow-x:hidden;}
+
+/* GRID */
+.gmain{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:10px;min-width:0;width:100%;overflow:hidden;}
+@media(max-width:960px){
+  .gmain{grid-template-columns:1fr;}
+  .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .sidebar .card:first-child{grid-column:1/-1;}
+}
+@media(max-width:480px){
+  .sidebar{display:flex;flex-direction:column;}
+}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;position:relative;overflow:hidden;width:100%;min-width:0;}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,47,255,.03),rgba(0,212,170,.02));pointer-events:none;}
+.ctitle{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--teal);letter-spacing:3px;margin-bottom:12px;}
+
+/* MODE TABS */
+.mtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.mb{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 11px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.mb:hover{border-color:var(--purple);color:var(--purple);background:var(--pdim);}
+.mb.on{background:var(--pdim);border-color:var(--purple);color:var(--purple);box-shadow:0 0 8px var(--pglow);}
+
+/* TIMER TABS */
+.ttabs{display:flex;gap:6px;}
+.tb{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;padding:7px 4px;font-family:'Orbitron',sans-serif;font-size:10px;color:var(--dim);cursor:pointer;transition:all .2s;text-align:center;}
+.tb:hover{border-color:var(--teal);color:var(--teal);}
+.tb.on{background:var(--tdim);border-color:var(--teal);color:var(--teal);box-shadow:0 0 8px var(--tglow);}
+
+/* COUNTDOWN */
+.cdown{font-family:'Orbitron',sans-serif;font-size:clamp(44px,10vw,78px);font-weight:900;text-align:center;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;padding:8px 0 6px;}
+.cdown.red{-webkit-text-fill-color:var(--red);background:none;}
+
+/* TYPING BOX */
+.tawrap{position:relative;margin-bottom:0;}
+.taura{position:absolute;inset:-1px;border-radius:11px;pointer-events:none;opacity:0;transition:opacity .3s;}
+.taura.on{opacity:1;box-shadow:0 0 18px var(--tglow),inset 0 0 14px rgba(0,212,170,.04);}
+.tbox{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(13px,2vw,17px);
+  line-height:2;
+  padding:14px;
+  background:var(--card2);
+  border-radius:10px;
+  border:1px solid var(--border);
+  height:calc(6em + 32px);
+  cursor:text;
+  user-select:none;
+  overflow:hidden;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  position:relative;
+}
+.ch{transition:color .08s;}
+.ch.ok{color:var(--teal);text-shadow:0 0 6px var(--tglow);}
+.ch.er{color:var(--red);text-shadow:0 0 5px rgba(255,51,102,.5);background:rgba(255,51,102,.1);border-radius:2px;}
+.ch.cur{color:#fff;background:rgba(123,47,255,.35);border-radius:3px;animation:cp .7s ease-in-out infinite;}
+@keyframes cp{0%,100%{box-shadow:0 0 7px var(--pglow)}50%{box-shadow:0 0 16px var(--purple)}}
+#ti{position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;font-size:16px;}
+
+/* COMBO */
+.combo{min-height:34px;display:flex;align-items:center;justify-content:center;margin:8px 0 0;}
+.cbadge{font-family:'Orbitron',sans-serif;font-size:clamp(13px,2.5vw,18px);font-weight:900;padding:4px 14px;border-radius:6px;display:none;}
+.cbadge.c1{background:var(--tdim);border:1px solid var(--teal);color:var(--teal);}
+.cbadge.c2{background:rgba(123,47,255,.2);border:1px solid var(--purple);color:var(--purple);box-shadow:0 0 14px var(--pglow);}
+.cbadge.c3{background:rgba(255,200,0,.15);border:1px solid #ffc800;color:#ffc800;box-shadow:0 0 20px rgba(255,200,0,.4);animation:cp2 .4s ease;}
+@keyframes cp2{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* STATS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+@media(max-width:440px){.srow{grid-template-columns:repeat(2,1fr);}}
+.sbox{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;}
+.sbox.t{border-color:rgba(0,212,170,.2);}
+.sbox.p{border-color:rgba(123,47,255,.2);}
+.sv{font-family:'Orbitron',sans-serif;font-size:clamp(16px,4vw,24px);font-weight:700;line-height:1;}
+.sv.t{color:var(--teal);text-shadow:0 0 10px var(--tglow);}
+.sv.p{color:var(--purple);text-shadow:0 0 10px var(--pglow);}
+.sv.w{color:#fff;}
+.sl{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:4px;}
+
+/* ACTIONS */
+.arow{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;}
+.btn{background:var(--grad);border:none;border-radius:7px;padding:9px 20px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:2px;box-shadow:0 0 14px var(--pglow);transition:all .2s;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--purple);}
+.btn2{background:transparent;border:1px solid var(--border);border-radius:7px;padding:8px 16px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.btn2:hover{border-color:var(--teal);color:var(--teal);}
+#stlbl{font-size:10px;color:var(--teal);letter-spacing:1px;margin-left:auto;}
+
+/* KEYBOARD */
+.kb{display:flex;flex-direction:column;gap:4px;align-items:center;margin-top:8px;}
+.kbr{display:flex;gap:4px;}
+.key{width:clamp(22px,3.5vw,28px);height:clamp(22px,3.5vw,28px);background:var(--card2);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);transition:all .15s;}
+.key.wide{width:clamp(34px,5vw,42px);}
+.key.space{width:clamp(110px,20vw,170px);}
+.key.kp{border-color:var(--teal);color:var(--teal);box-shadow:0 0 7px var(--tglow);background:var(--tdim);}
+.key.km{border-color:var(--red);color:var(--red);background:rgba(255,51,102,.1);}
+
+/* CHART */
+.mch{height:50px;margin-top:8px;}
+.mch svg{width:100%;height:100%;}
+.chlbl{font-size:10px;color:var(--dim);margin-top:5px;letter-spacing:1px;}
+
+/* SIDEBAR PROFILE */
+.prank{text-align:center;padding:8px 0 6px;}
+.picon{font-size:34px;display:block;margin-bottom:5px;}
+.ptitle{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+.xpbar{background:rgba(255,255,255,.05);border-radius:3px;height:4px;overflow:hidden;margin-top:7px;}
+.xpfill{height:100%;background:var(--grad);border-radius:3px;transition:width .6s ease;}
+.xpinfo{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:4px;}
+
+/* MISSIONS */
+.mi{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:9px;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.mi.done{border-color:rgba(0,212,170,.25);opacity:.6;}
+.mititle{font-size:12px;font-weight:600;color:var(--mid);flex:1;}
+.mixp{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--teal);white-space:nowrap;}
+.miprog{height:2px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:5px;}
+.mipf{height:100%;background:var(--grad);border-radius:2px;}
+
+/* LEADERBOARD */
+.lbi{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.lbi:last-child{border:none;}
+.lbr{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;width:18px;text-align:center;}
+.lbr.g{color:#ffc800}.lbr.s{color:#c0c0c0}.lbr.b{color:#cd7f32}.lbr.o{color:var(--dim)}
+.lbn{flex:1;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;}
+.lbc{font-size:9px;color:var(--dim);letter-spacing:1px;}
+.lbw{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--teal);}
+</style>
+</head>
+<body>
+<div id="ptc"></div>
+<div id="fl"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="b-logo">PIXELPROTECH<br>TYPING MACHINE</div>
+  <div class="b-sub">ELITE TYPING ACADEMY · SOUTH AFRICA</div>
+  <div class="b-bar"><div class="b-fill"></div></div>
+  <div class="b-log" id="blog"><span>Initializing neural input matrix...</span></div>
+</div>
+
+<!-- ACHIEVE -->
+<div id="ach"><div class="at">⚡ ACHIEVEMENT UNLOCKED</div><div class="an" id="an"></div></div>
+
+<!-- RESULTS -->
+<div id="res">
+  <div class="rc">
+    <div class="rt">SESSION COMPLETE</div>
+    <div class="rg">
+      <div class="rs"><div class="rv t" id="rwpm">0</div><div class="rl">WPM</div></div>
+      <div class="rs"><div class="rv p" id="racc">0%</div><div class="rl">ACCURACY</div></div>
+      <div class="rs"><div class="rv t" id="rch">0</div><div class="rl">CHARACTERS</div></div>
+      <div class="rs"><div class="rv p" id="rxp">0</div><div class="rl">XP EARNED</div></div>
+    </div>
+    <div class="rfb" id="rfb"></div>
+    <div class="ra">
+      <button class="btn" onclick="restart()">TRY AGAIN</button>
+      <button class="btn2" onclick="closeres()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<!-- HEADER -->
+<header>
+  <div class="htitle">
+    <div class="blogo">PIXELPROTECH</div>
+    <div class="btag">TYPING MACHINE · ELITE DIVISION</div>
+  </div>
+  <div class="hr">
+    <div class="hstr">🔥<b id="hstr">1</b><span style="color:var(--dim);font-size:9px;">D</span></div>
+    <div class="hbadge p">XP&nbsp;<span id="hxp">0</span></div>
+    <div class="hbadge t">LV&nbsp;<span id="hlv">1</span></div>
+  </div>
+</header>
+
+<!-- CONTENT -->
+<div class="wrap">
+<div class="gmain">
+
+<!-- LEFT COL -->
+<div>
+  <!-- MODE + TIMER -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="ctitle">Training Mode</div>
+    <div class="mtabs">
+      <button class="mb on" onclick="setMode('beginner',this)">Beginner</button>
+      <button class="mb" onclick="setMode('office',this)">Office</button>
+      <button class="mb" onclick="setMode('data',this)">Data Capture</button>
+      <button class="mb" onclick="setMode('coding',this)">Coding</button>
+      <button class="mb" onclick="setMode('cv',this)">CV Typing</button>
+      <button class="mb" onclick="setMode('gov',this)">Gov Forms</button>
+      <button class="mb" onclick="setMode('speed',this)">Speed Demon</button>
+    </div>
+    <div class="ttabs">
+      <button class="tb" onclick="setTimer(15,this)">15s</button>
+      <button class="tb on" onclick="setTimer(30,this)">30s</button>
+      <button class="tb" onclick="setTimer(60,this)">60s</button>
+      <button class="tb" onclick="setTimer(120,this)">120s</button>
+      <button class="tb" onclick="setTimer(0,this)">∞</button>
+    </div>
+  </div>
+
+  <!-- TYPING ENGINE -->
+  <div class="card">
+    <div class="ctitle">Live Training Area</div>
+    <div class="cdown" id="cd">30</div>
+    <div class="tawrap">
+      <div class="taura" id="aura"></div>
+      <div class="tbox" id="tbox" onclick="fi()"></div>
+      <input id="ti" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="inp(event)" onkeydown="kd(event)">
+    </div>
+    <div class="combo"><div class="cbadge" id="cb"></div></div>
+    <div class="srow">
+      <div class="sbox t"><div class="sv t" id="wpm">0</div><div class="sl">WPM</div></div>
+      <div class="sbox p"><div class="sv p" id="acc">100%</div><div class="sl">ACCURACY</div></div>
+      <div class="sbox"><div class="sv w" id="chs">0</div><div class="sl">CHARS</div></div>
+      <div class="sbox"><div class="sv t" id="mis">0</div><div class="sl">MISTAKES</div></div>
+    </div>
+    <div class="arow">
+      <button class="btn" id="sbtn" onclick="startTest()">START TEST</button>
+      <button class="btn2" onclick="restart()">RESET</button>
+      <span id="stlbl"></span>
+    </div>
+  </div>
+
+  <!-- KEYBOARD -->
+  <div class="card" style="margin-top:12px;">
+    <div class="ctitle">Keyboard Heatmap</div>
+    <div class="kb" id="kb">
+      <div class="kbr" id="kr1"></div>
+      <div class="kbr" id="kr2"></div>
+      <div class="kbr" id="kr3"></div>
+      <div class="kbr" id="kr4"></div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card" style="margin-top:12px;">
+    <div class="ctitle">WPM Performance</div>
+    <div class="mch">
+      <svg viewBox="0 0 500 50" preserveAspectRatio="none">
+        <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00d4aa" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#00d4aa" stop-opacity="0"/>
+        </linearGradient></defs>
+        <polyline id="wl" points="" fill="none" stroke="#00d4aa" stroke-width="2" stroke-linejoin="round"/>
+        <polygon id="wa" points="" fill="url(#cg)"/>
+      </svg>
+    </div>
+    <div class="chlbl" id="chlbl">Start typing to see your WPM graph</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <!-- PROFILE -->
+  <div class="card">
+    <div class="ctitle">Operator Profile</div>
+    <div class="prank">
+      <span class="picon" id="rico">🎯</span>
+      <div class="ptitle" id="rtitle">KEYBOARD ROOKIE</div>
+    </div>
+    <div style="font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:5px;">
+      LV <span id="lvn" style="color:var(--teal);">1</span> · <span id="xpn">0</span>/<span id="xpnx">500</span> XP
+    </div>
+    <div class="xpbar"><div class="xpfill" id="xpf"></div></div>
+    <div class="xpinfo">
+      <span>Best: <span id="bwpm" style="color:var(--teal);">0</span> WPM</span>
+      <span id="tsess">0 Sessions</span>
+    </div>
+    <div style="margin-top:12px;text-align:center"><button class="btn2" onclick="resetProgress()" aria-label="Reset all progress on this computer">RESET MY PROGRESS</button></div>
+  </div>
+
+  <!-- MISSIONS -->
+  <div class="card">
+    <div class="ctitle">Daily Missions</div>
+    <div id="mlist"></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="card">
+    <div class="ctitle">My Top 5 Scores</div>
+    <div id="lb"></div>
+  </div>
+</div>
+
+</div><!-- /gmain -->
+</div><!-- /wrap -->
+</div><!-- /app -->
+
+<script>
+// STATE
+const S={mode:'beginner',tl:30,run:false,go:false,txt:'',ci:0,err:0,t0:null,tiv:null,siv:null,left:30,hist:[],combo:0,xp:0,lv:1,xpnx:500,bwpm:0,sess:0,str:1,cwpm:0,mis:[],sessToday:0,msd:'',top:[],saveWarned:false};
+
+// PERSIST
+function sv(){try{let d={xp:S.xp,lv:S.lv,xpnx:S.xpnx,bwpm:S.bwpm,sess:S.sess,str:S.str,top:S.top};localStorage.setItem('ppt2',JSON.stringify(d));}catch(e){if(!S.saveWarned){S.saveWarned=true;ach('Progress could not be saved on this computer');}}}
+function ld(){try{let d=JSON.parse(localStorage.getItem('ppt2')||'{}');S.xp=+d.xp||0;S.lv=+d.lv||1;S.xpnx=+d.xpnx||500;S.bwpm=+d.bwpm||0;S.sess=+d.sess||0;S.str=+d.str||1;S.top=Array.isArray(d.top)?d.top.slice(0,5):[];}catch(e){}}
+function resetProgress(){if(!confirm('Reset ALL progress on this computer?\n\nThis clears your level, XP, best WPM, top scores and daily missions. It cannot be undone.'))return;try{localStorage.removeItem('ppt2');localStorage.removeItem('ppt_day');localStorage.removeItem('ppt_msn');}catch(e){}S.xp=0;S.lv=1;S.xpnx=500;S.bwpm=0;S.sess=0;S.str=1;S.top=[];S.saveWarned=false;bmis();rlb();restart();ach('Progress reset');}
+
+// TEXTS
+const TX={
+  beginner:["the cat sat on the mat and the dog ran in the park near the big blue lake and the sun was shining bright on that warm summer day in the city","a quick brown fox jumps over the lazy dog near the farm on the hill where the wind blows through the tall green grass in the early morning light","please type each word carefully and do not rush because accuracy is more important than speed when you are just starting to learn how to type properly"],
+  office:["Dear Mr Nkosi please find attached the updated proposal for the Q3 project which includes revised timelines and budget allocations for your review and approval","Please be advised that the staff meeting scheduled for Thursday has been moved to the main boardroom on the second floor at half past nine in the morning","Kindly submit all outstanding invoices to the finance department by end of business Friday to ensure timely processing before the month end cut off period"],
+  data:["ID 8501125678091 Surname Dlamini Name Sipho DoB 1985-01-12 Cell 0821234567 Address 45 Jacaranda Street Pretoria 0001 Account 62345678901","Invoice INV-2024-00123 Client Mokoena Enterprises Amount R45200.00 VAT R6328.00 Total R51528.00 Due Date 2024-02-15 Reference MKE-2024-JAN","Employee No 00456 Surname Sithole Name Zanele Department HR Grade 7 Salary R28500 Tax Number 1234567890 Bank FNB Account 62987654321"],
+  coding:["const fetchData = async url => { const res = await fetch(url); const data = await res.json(); return data.results.filter(x => x.active === true); }","function calcVAT(amount, rate = 0.15) { const vat = amount * rate; return { nett: amount, vat: vat, total: amount + vat }; }","SELECT name, department, salary FROM employees WHERE salary > 25000 ORDER BY salary DESC LIMIT 10"],
+  cv:["Objective To obtain a challenging administrative position where my skills in data management communication and office coordination can be fully utilised","Skills Microsoft Office Suite Advanced Excel SAP System Google Workspace Bilingual English and Zulu excellent written and verbal communication skills","Work Experience Administrative Officer Department of Public Works Pretoria January 2019 to Present document management filing procurement stakeholder liaison"],
+  gov:["Home Affairs Form BI-9 Application for South African Identity Document Surname Molefe Name Lerato Date of Birth 19900305 Place of Birth Soweto Gauteng","SARS Income Tax Return ITR12 Taxpayer Dube Thabo Tax Number 9876543210 Gross Income R320000 Medical Aid R18500 Retirement Annuity R24000","Municipality of Tshwane Account 700123456 Address 22 Boom Street Pretoria Statement 2024-01-31 Rates R1245 Water R387 Electricity R2108"],
+  speed:["fire speed data streams pulse through the grid lightning accuracy target locked operator engaged systems online maximum throughput elite performance mode activated","rapid fingers fly across keys faster stronger harder better push the limit break the ceiling smash every record set a new personal best today","velocity precision control momentum build your speed demolish the benchmark crush it type like your life depends on it because in this machine it does"]
+};
+
+// MISSIONS
+const MD=[
+  {id:'w40',title:'Reach 40 WPM',xp:200,ok:s=>s.cwpm>=40&&s.t0&&(Date.now()-s.t0)>=5000},
+  {id:'pf',title:'Zero Mistakes',xp:300,ok:s=>s.err===0&&s.ci>10},
+  {id:'c500',title:'Type 500 Chars',xp:150,ok:s=>s.ci>=500},
+  {id:'s3',title:'3 Sessions Today',xp:250,ok:s=>s.sessToday>=3}
+];
+function tdy(){return new Date().toDateString();}
+function lms(){try{const d=JSON.parse(localStorage.getItem('ppt_msn')||'{}');if(d.d===tdy()&&Array.isArray(d.done))return d;}catch(e){}return{d:tdy(),done:[],st:0};}
+function sms(){try{localStorage.setItem('ppt_msn',JSON.stringify({d:S.msd,done:S.mis.filter(m=>m.done).map(m=>m.id),st:S.sessToday}));}catch(e){}}
+function bmis(){const d=lms();S.msd=d.d;S.sessToday=+d.st||0;S.mis=MD.map(m=>({...m,done:d.done.indexOf(m.id)>-1}));rmis();}
+function rmis(){document.getElementById('mlist').innerHTML=S.mis.map(m=>`<div class="mi${m.done?' done':''}"><div style="flex:1"><div class="mititle">${m.done?'✅ ':''}${m.title}</div><div class="miprog"><div class="mipf" style="width:${m.done?100:0}%"></div></div></div><div class="mixp">+${m.xp}XP</div></div>`).join('');}
+function cmis(){let ch=false;S.mis.forEach(m=>{if(!m.done&&m.ok(S)){m.done=true;ch=true;gxp(m.xp);ach(m.title);}});if(ch){rmis();sms();}}
+
+// LEADERBOARD
+function rlb(){const el=document.getElementById('lb');const t=S.top||[];if(!t.length){el.innerHTML='<div class="lbc" style="padding:10px 0;line-height:1.6">No scores yet. Finish a test to set your first score.</div>';return;}const rc=['g','s','b','o','o'];const c=v=>String(v==null?'':v).replace(/[<>&"']/g,'');el.innerHTML=t.map((p,i)=>`<div class="lbi"><div class="lbr ${rc[i]}">${i+1}</div><div><div class="lbn">${(+p.w)|0} WPM</div><div class="lbc">${(+p.a)|0}% accuracy &middot; ${c(p.d)}</div></div><div class="lbw">${c(p.m)}</div></div>`).join('');}
+
+// KEYBOARD
+const KR=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M'],['SPACE']];
+function bkb(){KR.forEach((r,i)=>{const el=document.getElementById(`kr${i+1}`);r.forEach(k=>{const d=document.createElement('div');d.className=`key${k==='SPACE'?' space':k.length>1?' wide':''}`;d.textContent=k==='SPACE'?' ':k;d.id=`k_${k}`;el.appendChild(d);});});}
+function fk(ch,ok){const el=document.getElementById(ch===' '?'k_SPACE':`k_${ch.toUpperCase()}`);if(!el)return;el.classList.remove('kp','km');void el.offsetWidth;el.classList.add(ok?'kp':'km');setTimeout(()=>el.classList.remove('kp','km'),280);}
+
+// PARTICLES
+function spar(){const c=document.getElementById('ptc');for(let i=0;i<22;i++){const p=document.createElement('div');p.className='pt';const s=Math.random()*2.5+.5;p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${Math.random()>.5?'rgba(123,47,255,.5)':'rgba(0,212,170,.4)'};animation-duration:${9+Math.random()*10}s;animation-delay:${Math.random()*8}s;`;c.appendChild(p);}}
+
+// AUDIO
+let AC=null;
+function ga(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC;}
+function bip(w){try{const c=ga();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=w?210:1100+Math.random()*180;o.type=w?'sawtooth':'sine';g.gain.setValueAtTime(w?.06:.03,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.06);o.start();o.stop(c.currentTime+.06);}catch(e){}}
+function lvup(){try{const c=ga();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0,c.currentTime+i*.1);g.gain.linearRampToValueAtTime(.1,c.currentTime+i*.1+.05);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.1+.25);o.start(c.currentTime+i*.1);o.stop(c.currentTime+i*.1+.3);});}catch(e){}}
+function win(){try{const c=ga();[784,1047,1319].forEach((f,i)=>{const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(.09,c.currentTime+i*.12);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.12+.28);o.start(c.currentTime+i*.12);o.stop(c.currentTime+i*.12+.3);});}catch(e){}}
+
+// HELPERS
+function fl(cls){const el=document.getElementById('fl');el.className=cls;setTimeout(()=>el.className='',350);}
+function fi(){document.getElementById('ti').focus();}
+
+// TYPING ENGINE
+function setMode(m,btn){S.mode=m;document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');restart();}
+function setTimer(t,btn){S.tl=t;document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');restart();}
+function gtxt(){const p=TX[S.mode]||TX.beginner;const need=S.tl>0?S.tl*9:1200;let t='',last=-1;while(t.length<need){let i=Math.floor(Math.random()*p.length);if(p.length>1&&i===last)i=(i+1)%p.length;last=i;t+=(t?' ':'')+p[i];}return t;}
+
+function rtxt(){
+  document.getElementById('tbox').innerHTML=S.txt.split('').map((c,i)=>`<span class="ch" id="c${i}">${c===' '?' ':c.replace('&','&amp;').replace('<','&lt;')}</span>`).join('');
+  ucc();
+}
+function ucc(){document.querySelectorAll('.ch').forEach(e=>e.classList.remove('cur'));const el=document.getElementById(`c${S.ci}`);if(el){el.classList.add('cur');el.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+
+function kd(e){if(e.key==='Tab')e.preventDefault();if(!S.run&&!S.go&&e.key.length===1&&!document.getElementById('res').classList.contains('on'))startTest();}
+function inp(e){if(!S.run)return;const v=e.target.value;if(!v.length)return;const ch=v[v.length-1];e.target.value='';pc(ch);}
+
+function pc(ch){
+  if(S.ci>=S.txt.length)return;
+  const ex=S.txt[S.ci];const ok=ch===ex;
+  const el=document.getElementById(`c${S.ci}`);if(!el)return;
+  el.classList.remove('cur');
+  if(ok){el.classList.add('ok');S.combo++;ucb();}
+  else{el.classList.add('er');S.err++;S.combo=0;ucb();document.getElementById('mis').textContent=S.err;fl('fpp');}
+  bip(!ok);fk(ch,ok);
+  S.ci++;document.getElementById('chs').textContent=S.ci;
+  ucc();
+  // aura
+  const au=document.getElementById('aura');au.classList.add('on');clearTimeout(window._at);window._at=setTimeout(()=>au.classList.remove('on'),500);
+  if(S.ci>=S.txt.length)endTest();
+}
+
+function ucb(){
+  const b=document.getElementById('cb');
+  if(S.combo<5){b.style.display='none';return;}
+  b.style.display='block';
+  if(S.combo>=20){b.className='cbadge c3';b.textContent=`x10 · ${S.combo} COMBO`;fl('ftp');}
+  else if(S.combo>=10){b.className='cbadge c2';b.textContent=`x5 · ${S.combo} COMBO`;}
+  else{b.className='cbadge c1';b.textContent=`x2 · ${S.combo} COMBO`;}
+}
+
+function startTest(){
+  if(S.run)return;if(S.msd!==tdy())bmis();S.run=true;S.go=true;S.t0=Date.now();S.hist=[];
+  document.getElementById('sbtn').textContent='RUNNING...';document.getElementById('stlbl').textContent='● LIVE';
+  fi();
+  if(S.tl>0){S.left=S.tl;ucd();S.tiv=setInterval(()=>{S.left--;ucd();if(S.left<=0)endTest();},1000);}
+  else document.getElementById('cd').textContent='∞';
+  S.siv=setInterval(ust,500);
+}
+
+function ucd(){
+  const el=document.getElementById('cd');el.textContent=S.left;
+  el.className=S.left<=5?'cdown red':'cdown';
+}
+
+function ust(){
+  const el=(Date.now()-S.t0)/6e4;const w=S.ci/5;const wpm=el>0?Math.round(w/el):0;
+  S.cwpm=wpm;const ac=S.ci>0?Math.round(((S.ci-S.err)/S.ci)*100):100;
+  document.getElementById('wpm').textContent=wpm;document.getElementById('acc').textContent=ac+'%';
+  S.hist.push(wpm);uch();cmis();
+}
+
+function uch(){
+  const h=S.hist;if(h.length<2)return;
+  const mx=500,mh=50,p=4,mv=Math.max(...h,50);
+  const pts=h.map((v,i)=>`${p+(i/(h.length-1))*(mx-p*2)},${mh-p-(v/mv)*(mh-p*2)}`).join(' ');
+  const lx=pts.split(' ').pop().split(',')[0];const ar=pts+` ${lx},${mh} ${p},${mh}`;
+  document.getElementById('wl').setAttribute('points',pts);document.getElementById('wa').setAttribute('points',ar);
+  document.getElementById('chlbl').textContent=`Peak: ${Math.max(...h)} WPM · Current: ${S.cwpm} WPM`;
+}
+
+function endTest(){
+  clearInterval(S.tiv);clearInterval(S.siv);S.run=false;S.go=false;
+  if(S.ci===0){restart();return;}
+  S.sess++;S.sessToday++;
+  const el=(Date.now()-S.t0)/6e4;const w=S.ci/5;const wpm=el>0?Math.round(w/el):0;
+  const ac=S.ci>0?Math.round(((S.ci-S.err)/S.ci)*100):100;
+  if(wpm>S.bwpm){S.bwpm=wpm;ach(`New Best: ${wpm} WPM!`);}
+  S.top.push({w:wpm,a:ac,d:new Date().toLocaleDateString(),m:S.mode});S.top.sort((a,b)=>b.w-a.w);S.top=S.top.slice(0,5);rlb();
+  const xpe=cxp(wpm,ac,S.ci);gxp(xpe);cmis();sms();win();sres(wpm,ac,xpe);sv();
+}
+
+function cxp(w,a,c){let x=Math.round(c*.5+w*2+(a/100)*100);if(S.combo>=20)x=Math.round(x*1.5);return x;}
+
+function gxp(amt){
+  S.xp+=amt;
+  while(S.xp>=S.xpnx){S.xp-=S.xpnx;S.lv++;S.xpnx=Math.round(S.xpnx*1.4);lvup();ach(`LEVEL UP! LV ${S.lv}`);}
+  upr();xxp(amt);
+}
+
+function xxp(amt){const el=document.createElement('div');el.className='xpp';el.textContent=`+${amt} XP`;el.style.left=(Math.random()*50+20)+'%';el.style.top='35%';document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
+
+const RK=[{l:1,t:'KEYBOARD ROOKIE',i:'🎯'},{l:3,t:'DATA RUNNER',i:'⚡'},{l:6,t:'OFFICE SOLDIER',i:'🛡️'},{l:10,t:'PIXEL OPERATOR',i:'💻'},{l:15,t:'TYPING ASSASSIN',i:'🗡️'},{l:20,t:'ELITE COMMANDER',i:'👑'}];
+function grk(){let r=RK[0];RK.forEach(x=>{if(S.lv>=x.l)r=x;});return r;}
+function upr(){
+  const r=grk();
+  document.getElementById('rico').textContent=r.i;document.getElementById('rtitle').textContent=r.t;
+  document.getElementById('lvn').textContent=S.lv;document.getElementById('xpn').textContent=S.xp;document.getElementById('xpnx').textContent=S.xpnx;
+  document.getElementById('xpf').style.width=(S.xp/S.xpnx*100)+'%';
+  document.getElementById('hxp').textContent=S.xp;document.getElementById('hlv').textContent=S.lv;
+  document.getElementById('bwpm').textContent=S.bwpm;document.getElementById('tsess').textContent=S.sess+' Sessions';
+  document.getElementById('hstr').textContent=S.str;
+}
+
+function sres(w,a,x){
+  document.getElementById('rwpm').textContent=w;document.getElementById('racc').textContent=a+'%';
+  document.getElementById('rch').textContent=S.ci;document.getElementById('rxp').textContent=x;
+  document.getElementById('rfb').innerHTML=gfb(w,a);document.getElementById('res').classList.add('on');
+}
+function gfb(w,a){
+  let t=[];
+  if(w<20)t.push('<strong>Speed:</strong> Focus on smooth key presses. Do not rush — accuracy first, speed follows.');
+  else if(w<40)t.push('<strong>Speed:</strong> Good progress! Use Speed Demon mode to push past 40 WPM.');
+  else if(w<70)t.push('<strong>Speed:</strong> Excellent! You are above average. Target 70+ WPM next.');
+  else t.push('<strong>Speed:</strong> Elite performance. Keep your accuracy this high as you speed up.');
+  if(a<85)t.push('<strong>Accuracy:</strong> Slow down slightly and focus on hitting the correct key before moving on.');
+  else if(a<95)t.push('<strong>Accuracy:</strong> Solid accuracy. Aim for 97%+ by training your weak finger positions.');
+  else t.push('<strong>Accuracy:</strong> Outstanding precision. Your finger discipline is exceptional.');
+  t.push('<strong>Next Challenge:</strong> '+(w<40?'Complete Office Mode to build business typing confidence.':'Try the 120-second test to build sustained endurance.'));
+  return t.map(x=>`<p>${x}</p>`).join('');
+}
+function closeres(){document.getElementById('res').classList.remove('on');}
+
+let at;
+function ach(name){clearTimeout(at);document.getElementById('an').textContent=name;const el=document.getElementById('ach');el.classList.add('on');at=setTimeout(()=>el.classList.remove('on'),3000);}
+
+function restart(){
+  clearInterval(S.tiv);clearInterval(S.siv);
+  S.run=false;S.go=false;S.ci=0;S.err=0;S.combo=0;S.hist=[];S.cwpm=0;S.left=S.tl;
+  S.txt=gtxt();rtxt();
+  document.getElementById('wpm').textContent='0';document.getElementById('acc').textContent='100%';
+  document.getElementById('chs').textContent='0';document.getElementById('mis').textContent='0';
+  document.getElementById('cd').textContent=S.tl===0?'∞':S.tl;document.getElementById('cd').className='cdown';
+  document.getElementById('cb').style.display='none';
+  document.getElementById('sbtn').textContent='START TEST';document.getElementById('stlbl').textContent='';
+  document.getElementById('ti').value='';
+  document.getElementById('wl').setAttribute('points','');document.getElementById('wa').setAttribute('points','');
+  document.getElementById('chlbl').textContent='Start typing to see your WPM graph';
+  document.getElementById('aura').classList.remove('on');
+  closeres();upr();fi();
+}
+
+// BOOT MESSAGES
+const BM=['Loading elite training modules...','Calibrating neural input matrix...','Loading your saved progress...','Systems online. Welcome, Operator.'];
+let bi=0;
+function rb(){const el=document.getElementById('blog');if(bi<BM.length){el.innerHTML=`<span>${BM[bi]}</span>`;bi++;setTimeout(rb,560);}}
+
+// INIT
+window.addEventListener('load',()=>{
+  spar();bkb();ld();bmis();rlb();restart();rb();upr();
+  try{const td=new Date().toDateString();const ld2=localStorage.getItem('ppt_day')||'';
+  if(ld2!==td){localStorage.setItem('ppt_day',td);if(ld2){const df=(new Date(td)-new Date(ld2))/864e5;S.str=df<=1?S.str+1:1;}sv();upr();}}catch(e){}
+  document.addEventListener('click',()=>{try{ga();}catch(e){}},{once:true});
+});
+
+// PWA: register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .catch((err) => console.warn('Service worker registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
